@@ -10,6 +10,14 @@ export class AuthController {
    */
   @Post('login')
   public login(): string {
-    return 'This action returns auth object';
+    return 'This action returns login object';
+  }
+
+  /**
+   * Post sign ok
+   */
+  @Post('sign')
+  public sign(): string {
+    return 'This action returns sign object';
   }
 }

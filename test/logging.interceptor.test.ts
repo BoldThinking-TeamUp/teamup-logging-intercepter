@@ -66,13 +66,20 @@ describe('Logging interceptor', () => {
     ]);
   });
 
-  it('logs the input and output auth/login(body: object) details - OK status code', async () => {
+  it('mask logs the input and output auth/login(body: object) - OK status code', async () => {
     const logSpy: jest.SpyInstance = jest.spyOn(Logger.prototype, 'log');
     const url: string = `/auth/login`;
 
     await request(app.getHttpServer()).post(url).send({
       email: 'test@test.com',
-      password: 'test-password'
+      password: 'test-password',
+      sub: {
+        one: "plain text",
+        two: {
+          three: 'three'
+        }
+      },
+      arraySub: [1,2,3]
     }).expect(HttpStatus.CREATED);
 
     const ctx: string = `LoggingInterceptor - POST - ${url}`;
@@ -88,7 +95,14 @@ describe('Logging interceptor', () => {
       {
         body: {
           email: 'test@test.com',
-          password: '****'
+          password: '****',
+          sub: {
+            one: '****',
+            two: {
+              three: '****',
+            }
+          },
+          arraySub: '****',
         },
         headers: expect.any(Object),
         message: incomingMsg,
@@ -99,7 +113,48 @@ describe('Logging interceptor', () => {
     expect(logSpy.mock.calls[1]).toEqual([
       {
         message: outgoingMsg,
-        body: `This action returns auth object`,
+        body: `This action returns login object`,
+      },
+      resCtx,
+    ]);
+  });
+
+  it('logs the input and output auth/sign(body: object) details - OK status code', async () => {
+    const logSpy: jest.SpyInstance = jest.spyOn(Logger.prototype, 'log');
+    const url: string = `/auth/sign`;
+
+    await request(app.getHttpServer()).post(url).send({
+      userinfo: 'test@test.com',
+      password: 'test-password',
+      gender: 'male'
+    }).expect(HttpStatus.CREATED);
+
+    const ctx: string = `LoggingInterceptor - POST - ${url}`;
+    const resCtx: string = `LoggingInterceptor - 201 - POST - ${url}`;
+    const incomingMsg: string = `Incoming request - POST - ${url}`;
+    const outgoingMsg: string = `Outgoing response - 201 - POST - ${url}`;
+
+    /**
+     * Info level
+     */
+    expect(logSpy).toBeCalledTimes(2);
+    expect(logSpy.mock.calls[0]).toEqual([
+      {
+        body: {
+          userinfo: 'test@test.com',
+          password: '****',
+          gender: 'male'
+        },
+        headers: expect.any(Object),
+        message: incomingMsg,
+        method: `POST`,
+      },
+      ctx,
+    ]);
+    expect(logSpy.mock.calls[1]).toEqual([
+      {
+        message: outgoingMsg,
+        body: `This action returns sign object`,
       },
       resCtx,
     ]);

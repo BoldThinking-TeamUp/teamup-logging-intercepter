@@ -9,7 +9,27 @@ import { LoggingInterceptor } from '../../../src';
   providers: [
     {
       provide: APP_INTERCEPTOR,
-      useClass: LoggingInterceptor,
+      useFactory: () => {
+        const interceptor: LoggingInterceptor = new LoggingInterceptor();
+        interceptor.setMaskConfig([
+          {
+            request: {
+              url: '/auth/login',
+              method: 'post',
+              params: ['password', 'arraySub', 'sub.one', 'sub.two.three']
+            }
+          },
+          {
+            request: {
+              url: '/auth/sign',
+              method: 'post',
+              params: ['password']
+            }
+          }
+        ])
+
+        return interceptor;
+      },
     },
   ],
 })
