@@ -33,6 +33,13 @@ export class LoggingInterceptor implements NestInterceptor {
   private userPrefix: string = '';
   private maskConfigs?: MaskConfigType[];
 
+  /**
+   * Parse and Mask the body by maskConfigs
+   * @param maskConfig maskConfig
+   * @param body parsed body
+   * @param prefixKey prefixKey for nest structure
+   * @returns MaskedBody
+   */
   private parseBody(maskConfig: MaskConfigType,body: object, prefixKey?: string): MaskedBody {
     const maskedBody = Object.keys(body).reduce(
       (maskedBody: MaskedBody, currentKey: string): {[key: string]: string} => {
