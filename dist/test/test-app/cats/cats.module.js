@@ -5,21 +5,16 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.CatsModule = void 0;
-var common_1 = require("@nestjs/common");
-var cats_controller_1 = require("./cats.controller");
-/**
- * Cats module
- */
-var CatsModule = /** @class */ (function () {
-    function CatsModule() {
-    }
-    CatsModule = __decorate([
-        (0, common_1.Module)({
-            controllers: [cats_controller_1.CatsController]
-        })
-    ], CatsModule);
-    return CatsModule;
-}());
+const common_1 = require("@nestjs/common");
+const cats_controller_1 = require("./cats.controller");
+let CatsModule = class CatsModule {
+};
+CatsModule = __decorate([
+    (0, common_1.Module)({
+        controllers: [cats_controller_1.CatsController],
+    })
+], CatsModule);
 exports.CatsModule = CatsModule;
+//# sourceMappingURL=cats.module.js.map

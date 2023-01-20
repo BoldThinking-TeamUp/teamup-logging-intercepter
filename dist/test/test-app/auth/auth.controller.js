@@ -8,30 +8,31 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
-var common_1 = require("@nestjs/common");
-/**
- * Controller: /auth
- */
-var AuthController = /** @class */ (function () {
-    function AuthController() {
+const common_1 = require("@nestjs/common");
+let AuthController = class AuthController {
+    login() {
+        return 'This action returns login object';
     }
-    /**
-     * Post login ok
-     */
-    AuthController.prototype.login = function () {
-        return 'This action returns auth object';
-    };
-    __decorate([
-        (0, common_1.Post)('login'),
-        __metadata("design:type", Function),
-        __metadata("design:paramtypes", []),
-        __metadata("design:returntype", String)
-    ], AuthController.prototype, "login");
-    AuthController = __decorate([
-        (0, common_1.Controller)('auth')
-    ], AuthController);
-    return AuthController;
-}());
+    sign() {
+        return 'This action returns sign object';
+    }
+};
+__decorate([
+    (0, common_1.Post)('login'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", String)
+], AuthController.prototype, "login", null);
+__decorate([
+    (0, common_1.Post)('sign'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", String)
+], AuthController.prototype, "sign", null);
+AuthController = __decorate([
+    (0, common_1.Controller)('auth')
+], AuthController);
 exports.AuthController = AuthController;
+//# sourceMappingURL=auth.controller.js.map

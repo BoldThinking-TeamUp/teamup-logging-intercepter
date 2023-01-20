@@ -11,6 +11,18 @@ import { Request, Response } from 'express';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
+type MaskConfigType = {
+  request?: {
+    url: string,
+    method: string;
+    params?: string[]
+  }
+};
+
+type MaskedBody = {
+  [x: string]: any;
+}
+
 /**
  * Interceptor that logs input/output requests
  */
@@ -19,6 +31,31 @@ export class LoggingInterceptor implements NestInterceptor {
   private readonly ctxPrefix: string = LoggingInterceptor.name;
   private readonly logger: Logger = new Logger(this.ctxPrefix);
   private userPrefix: string = '';
+  private maskConfigs?: MaskConfigType[];
+
+  private parseBody(maskConfig: MaskConfigType,body: object, prefixKey?: string): MaskedBody {
+    const maskedBody = Object.keys(body).reduce(
+      (maskedBody: MaskedBody, currentKey: string): {[key: string]: string} => {
+        const mixedKey = prefixKey ? `${prefixKey}.${currentKey}` : currentKey;
+
+        // value of param is string or array
+        if (typeof body[currentKey] === 'string' || Array.isArray(body[currentKey])) {
+          return {
+            ...maskedBody,
+            [currentKey]: maskConfig?.request?.params?.find(param => param === mixedKey) ? '****' : body[currentKey]
+          }
+        }
+
+        // value of param is parsable object
+        const subBody = body[currentKey];
+        return {
+          ...maskedBody,
+          [currentKey]: this.parseBody(maskConfig, subBody, mixedKey)
+        }
+      },
+    {} as MaskedBody);
+    return maskedBody;
+  }
 
   /**
    * User prefix setter
@@ -26,6 +63,10 @@ export class LoggingInterceptor implements NestInterceptor {
    */
   public setUserPrefix(prefix: string): void {
     this.userPrefix = `${prefix} - `;
+  }
+
+  public setMaskConfig(config?: MaskConfigType[]): void {
+    this.maskConfigs = config
   }
 
   /**
@@ -40,14 +81,10 @@ export class LoggingInterceptor implements NestInterceptor {
     const message: string = `Incoming request - ${method} - ${url}`;
 
     let maskedBody: string | object;
-    if (url === '/auth/login') {
+    const maskConfig = this.maskConfigs.find(config => config?.request.url === url);
+    if (url === maskConfig?.request.url && method.toLowerCase() === maskConfig?.request?.method.toLowerCase()) {
       if (typeof body === 'object') {
-        maskedBody = Object.keys(body).reduce(
-          (accumulator: {[key: string]: string}, currentValue: string): {[key: string]: string} => ({
-            ...accumulator,
-            [currentValue]: currentValue !== 'password' ? body[currentValue] : '****'
-          }), 
-        {});
+        maskedBody = this.parseBody(maskConfig, body)
       } else {
         maskedBody = '****';
       }
