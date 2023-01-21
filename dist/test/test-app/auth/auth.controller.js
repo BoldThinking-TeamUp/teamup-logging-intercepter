@@ -20,13 +20,13 @@ let AuthController = class AuthController {
     }
 };
 __decorate([
-    (0, common_1.Post)('login'),
+    (0, common_1.Post)('login/:id'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", String)
 ], AuthController.prototype, "login", null);
 __decorate([
-    (0, common_1.Post)('sign'),
+    (0, common_1.Post)('sign/:uid'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", String)
