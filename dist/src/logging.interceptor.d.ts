@@ -4,6 +4,7 @@ type MaskConfigType = {
     request?: {
         url: string;
         method: string;
+        pattern?: string;
         params?: string[];
     };
 };
@@ -13,6 +14,7 @@ export declare class LoggingInterceptor implements NestInterceptor {
     private userPrefix;
     private maskConfigs?;
     private parseBody;
+    private getPatternUrl;
     setUserPrefix(prefix: string): void;
     setMaskConfig(config?: MaskConfigType[]): void;
     intercept(context: ExecutionContext, call$: CallHandler): Observable<unknown>;

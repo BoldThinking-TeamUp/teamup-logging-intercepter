@@ -50,7 +50,7 @@ describe('Logging interceptor', () => {
     });
     it('mask logs the input and output auth/login(body: object) - OK status code', async () => {
         const logSpy = jest.spyOn(common_1.Logger.prototype, 'log');
-        const url = `/auth/login`;
+        const url = `/auth/login/123`;
         await request(app.getHttpServer()).post(url).send({
             email: 'test@test.com',
             password: 'test-password',
@@ -96,7 +96,7 @@ describe('Logging interceptor', () => {
     });
     it('logs the input and output auth/sign(body: object) details - OK status code', async () => {
         const logSpy = jest.spyOn(common_1.Logger.prototype, 'log');
-        const url = `/auth/sign`;
+        const url = `/auth/sign/f3456b-gh13r`;
         await request(app.getHttpServer()).post(url).send({
             userinfo: 'test@test.com',
             password: 'test-password',

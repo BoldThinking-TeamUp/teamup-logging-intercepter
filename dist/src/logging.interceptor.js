@@ -10,6 +10,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.LoggingInterceptor = void 0;
 const common_1 = require("@nestjs/common");
 const operators_1 = require("rxjs/operators");
+const VAR = '{var}';
 let LoggingInterceptor = LoggingInterceptor_1 = class LoggingInterceptor {
     constructor() {
         this.ctxPrefix = LoggingInterceptor_1.name;
@@ -28,6 +29,20 @@ let LoggingInterceptor = LoggingInterceptor_1 = class LoggingInterceptor {
         }, {});
         return maskedBody;
     }
+    getPatternUrl(rawUrl = '', configUrl = '', pattern = VAR) {
+        const rawUrlPieces = rawUrl.split("/");
+        const constUrlPatternPieces = configUrl.split('/');
+        const patternIndexs = constUrlPatternPieces.reduce((pieces, piece, index) => {
+            if (piece === pattern) {
+                pieces.push(index);
+            }
+            return pieces;
+        }, []);
+        patternIndexs.forEach(index => {
+            rawUrlPieces[index] = pattern;
+        });
+        return rawUrlPieces.join('/');
+    }
     setUserPrefix(prefix) {
         this.userPrefix = `${prefix} - `;
     }
@@ -40,9 +55,17 @@ let LoggingInterceptor = LoggingInterceptor_1 = class LoggingInterceptor {
         const { method, url, body, headers } = req;
         const ctx = `${this.userPrefix}${this.ctxPrefix} - ${method} - ${url}`;
         const message = `Incoming request - ${method} - ${url}`;
+        let patternUrl = '';
         let maskedBody;
-        const maskConfig = this.maskConfigs.find(config => (config === null || config === void 0 ? void 0 : config.request.url) === url);
-        if (url === (maskConfig === null || maskConfig === void 0 ? void 0 : maskConfig.request.url) && method.toLowerCase() === ((_a = maskConfig === null || maskConfig === void 0 ? void 0 : maskConfig.request) === null || _a === void 0 ? void 0 : _a.method.toLowerCase())) {
+        const maskConfig = this.maskConfigs.find(config => {
+            const temporaryPatternUrl = this.getPatternUrl(url, config === null || config === void 0 ? void 0 : config.request.url, config === null || config === void 0 ? void 0 : config.request.pattern);
+            if (temporaryPatternUrl === (config === null || config === void 0 ? void 0 : config.request.url)) {
+                patternUrl = temporaryPatternUrl;
+                return true;
+            }
+            return false;
+        });
+        if (patternUrl === (maskConfig === null || maskConfig === void 0 ? void 0 : maskConfig.request.url) && method.toLowerCase() === ((_a = maskConfig === null || maskConfig === void 0 ? void 0 : maskConfig.request) === null || _a === void 0 ? void 0 : _a.method.toLowerCase())) {
             if (typeof body === 'object') {
                 maskedBody = this.parseBody(maskConfig, body);
             }
