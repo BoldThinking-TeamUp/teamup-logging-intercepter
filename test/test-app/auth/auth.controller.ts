@@ -8,7 +8,7 @@ export class AuthController {
   /**
    * Post login ok
    */
-  @Post('login')
+  @Post('login/:id')
   public login(): string {
     return 'This action returns login object';
   }
@@ -16,7 +16,7 @@ export class AuthController {
   /**
    * Post sign ok
    */
-  @Post('sign')
+  @Post('sign/:uid')
   public sign(): string {
     return 'This action returns sign object';
   }

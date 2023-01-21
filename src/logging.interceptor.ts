@@ -15,6 +15,7 @@ type MaskConfigType = {
   request?: {
     url: string,
     method: string;
+    pattern?: string; // default {var}
     params?: string[]
   }
 };
@@ -22,6 +23,8 @@ type MaskConfigType = {
 type MaskedBody = {
   [x: string]: any;
 }
+
+const VAR = '{var}'
 
 /**
  * Interceptor that logs input/output requests
@@ -65,6 +68,31 @@ export class LoggingInterceptor implements NestInterceptor {
   }
 
   /**
+   * Get consist pattern url from raw url
+   * @param rawUrl raw url
+   * @param configUrl config url mask configurations
+   * @param pattern url pattern to get pattern url
+   * @returns Fixed Url relaced with varPattern
+   */
+  private getPatternUrl(rawUrl: string = '', configUrl: string = '', pattern: string = VAR) {
+    const rawUrlPieces = rawUrl.split("/")
+    const constUrlPatternPieces = configUrl.split('/')
+
+    const patternIndexs = constUrlPatternPieces.reduce((pieces, piece, index) => {
+      if (piece === pattern) {
+        pieces.push(index)        
+      }
+      return pieces
+    }, [])
+
+    patternIndexs.forEach(index => {
+      rawUrlPieces[index] = pattern
+    });
+
+    return rawUrlPieces.join('/')
+  }
+
+  /**
    * User prefix setter
    * ex. [MyPrefix - LoggingInterceptor - 200 - GET - /]
    */
@@ -72,6 +100,10 @@ export class LoggingInterceptor implements NestInterceptor {
     this.userPrefix = `${prefix} - `;
   }
 
+  /**
+   * User mask configuration
+   * ex. [{request: {url: 'xxx/yyy', method: 'post', params: ['param', 'param.subParam']}}]
+   */
   public setMaskConfig(config?: MaskConfigType[]): void {
     this.maskConfigs = config
   }
@@ -86,10 +118,19 @@ export class LoggingInterceptor implements NestInterceptor {
     const { method, url, body, headers } = req;
     const ctx: string = `${this.userPrefix}${this.ctxPrefix} - ${method} - ${url}`;
     const message: string = `Incoming request - ${method} - ${url}`;
-
+    
+    let patternUrl = '';
     let maskedBody: string | object;
-    const maskConfig = this.maskConfigs.find(config => config?.request.url === url);
-    if (url === maskConfig?.request.url && method.toLowerCase() === maskConfig?.request?.method.toLowerCase()) {
+    const maskConfig = this.maskConfigs.find(config => {
+      const temporaryPatternUrl = this.getPatternUrl(url, config?.request.url, config?.request.pattern);
+      if (temporaryPatternUrl === config?.request.url) {
+        patternUrl = temporaryPatternUrl
+        return true;
+      }
+      return false
+    });
+
+    if (patternUrl === maskConfig?.request.url && method.toLowerCase() === maskConfig?.request?.method.toLowerCase()) {
       if (typeof body === 'object') {
         maskedBody = this.parseBody(maskConfig, body)
       } else {

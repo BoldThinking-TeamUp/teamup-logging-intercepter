@@ -14,14 +14,15 @@ import { LoggingInterceptor } from '../../../src';
         interceptor.setMaskConfig([
           {
             request: {
-              url: '/auth/login',
+              url: '/auth/login/{id}',
+              pattern: '{id}',
               method: 'post',
               params: ['password', 'arraySub', 'sub.one', 'sub.two.three']
             }
           },
           {
             request: {
-              url: '/auth/sign',
+              url: '/auth/sign/{var}',
               method: 'post',
               params: ['password']
             }
