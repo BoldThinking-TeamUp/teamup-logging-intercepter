@@ -93,6 +93,17 @@ export class LoggingInterceptor implements NestInterceptor {
   }
 
   /**
+   * check the url is needs masking
+   * @param patternUrl url pattern to get pattern url
+   * @param method raw url
+   * @param maskConfig maskConfig
+   * @returns boolean
+   */
+  private needMaks(patternUrl: string, method: string, maskConfig: MaskConfigType) {
+    return patternUrl === maskConfig?.request.url && method.toLowerCase() === maskConfig?.request?.method.toLowerCase()
+  }
+
+  /**
    * User prefix setter
    * ex. [MyPrefix - LoggingInterceptor - 200 - GET - /]
    */
@@ -123,14 +134,14 @@ export class LoggingInterceptor implements NestInterceptor {
     let maskedBody: string | object;
     const maskConfig = this.maskConfigs.find(config => {
       const temporaryPatternUrl = this.getPatternUrl(url, config?.request.url, config?.request.pattern);
-      if (temporaryPatternUrl === config?.request.url) {
+      if (this.needMaks(temporaryPatternUrl, method, config)) {
         patternUrl = temporaryPatternUrl
         return true;
       }
       return false
     });
 
-    if (patternUrl === maskConfig?.request.url && method.toLowerCase() === maskConfig?.request?.method.toLowerCase()) {
+    if (this.needMaks(patternUrl, method, maskConfig)) {
       if (typeof body === 'object') {
         maskedBody = this.parseBody(maskConfig, body)
       } else {

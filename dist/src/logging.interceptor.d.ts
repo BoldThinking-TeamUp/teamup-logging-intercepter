@@ -15,6 +15,7 @@ export declare class LoggingInterceptor implements NestInterceptor {
     private maskConfigs?;
     private parseBody;
     private getPatternUrl;
+    private needMaks;
     setUserPrefix(prefix: string): void;
     setMaskConfig(config?: MaskConfigType[]): void;
     intercept(context: ExecutionContext, call$: CallHandler): Observable<unknown>;

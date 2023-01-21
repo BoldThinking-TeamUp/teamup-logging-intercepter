@@ -43,6 +43,10 @@ let LoggingInterceptor = LoggingInterceptor_1 = class LoggingInterceptor {
         });
         return rawUrlPieces.join('/');
     }
+    needMaks(patternUrl, method, maskConfig) {
+        var _a;
+        return patternUrl === (maskConfig === null || maskConfig === void 0 ? void 0 : maskConfig.request.url) && method.toLowerCase() === ((_a = maskConfig === null || maskConfig === void 0 ? void 0 : maskConfig.request) === null || _a === void 0 ? void 0 : _a.method.toLowerCase());
+    }
     setUserPrefix(prefix) {
         this.userPrefix = `${prefix} - `;
     }
@@ -50,7 +54,6 @@ let LoggingInterceptor = LoggingInterceptor_1 = class LoggingInterceptor {
         this.maskConfigs = config;
     }
     intercept(context, call$) {
-        var _a;
         const req = context.switchToHttp().getRequest();
         const { method, url, body, headers } = req;
         const ctx = `${this.userPrefix}${this.ctxPrefix} - ${method} - ${url}`;
@@ -59,13 +62,13 @@ let LoggingInterceptor = LoggingInterceptor_1 = class LoggingInterceptor {
         let maskedBody;
         const maskConfig = this.maskConfigs.find(config => {
             const temporaryPatternUrl = this.getPatternUrl(url, config === null || config === void 0 ? void 0 : config.request.url, config === null || config === void 0 ? void 0 : config.request.pattern);
-            if (temporaryPatternUrl === (config === null || config === void 0 ? void 0 : config.request.url)) {
+            if (this.needMaks(temporaryPatternUrl, method, config)) {
                 patternUrl = temporaryPatternUrl;
                 return true;
             }
             return false;
         });
-        if (patternUrl === (maskConfig === null || maskConfig === void 0 ? void 0 : maskConfig.request.url) && method.toLowerCase() === ((_a = maskConfig === null || maskConfig === void 0 ? void 0 : maskConfig.request) === null || _a === void 0 ? void 0 : _a.method.toLowerCase())) {
+        if (this.needMaks(patternUrl, method, maskConfig)) {
             if (typeof body === 'object') {
                 maskedBody = this.parseBody(maskConfig, body);
             }
